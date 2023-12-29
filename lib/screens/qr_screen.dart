@@ -45,7 +45,7 @@ class _QrScreenState extends State<QrScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Cool QR Scanner',
+          'Scan QR Code',
           style: blueTextStyle.copyWith(
             fontSize: 14,
             fontWeight: semiBold,
@@ -71,103 +71,106 @@ class _QrScreenState extends State<QrScreen> {
             flex: 1,
             child: FittedBox(
               fit: BoxFit.contain,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  if (result != null)
-                    Text(
-                        'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
-                  else
-                    const Text('Scan a code'),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Container(
-                        margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
-                            onPressed: () async {
-                              await controller?.toggleFlash();
-                              setState(() {});
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: primaryColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                    20), // Adjust the radius to make it more or less rounded
-                              ),
-                            ),
-                            child: FutureBuilder(
-                              future: controller?.getFlashStatus(),
-                              builder: (context, snapshot) {
-                                // return Text('Flash: ${snapshot.data}');
-                                final isFlashOn = snapshot.data == true;
-                                return Row(
-                                  children: [
-                                    isFlashOn
-                                        ? const Icon(Icons.flashlight_on_sharp,
-                                            size: 18, color: Colors.yellow)
-                                        : const Icon(Icons.flashlight_off_sharp,
-                                            size: 18),
-                                    Text(
-                                      "Flash",
-                                      style: blueTextStyle.copyWith(
-                                        fontSize: 12,
-                                        fontWeight: semiBold,
-                                        color: whiteColor,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                );
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    if (result != null)
+                      Text(
+                          'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
+                    else
+                      const Text('Arahkan Code QR'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Container(
+                          margin: const EdgeInsets.all(8),
+                          child: ElevatedButton(
+                              onPressed: () async {
+                                await controller?.toggleFlash();
+                                setState(() {});
                               },
-                            )),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
-                            onPressed: () async {
-                              await controller?.flipCamera();
-                              setState(() {});
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: primaryColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                    20), // Adjust the radius to make it more or less rounded
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      20), // Adjust the radius to make it more or less rounded
+                                ),
                               ),
-                            ),
-                            child: FutureBuilder(
-                              future: controller?.getCameraInfo(),
-                              builder: (context, snapshot) {
-                                if (snapshot.data != null) {
-                                  // return Text(' ${describeEnum(snapshot.data!)} ');
+                              child: FutureBuilder(
+                                future: controller?.getFlashStatus(),
+                                builder: (context, snapshot) {
+                                  // return Text('Flash: ${snapshot.data}');
+                                  final isFlashOn = snapshot.data == true;
                                   return Row(
                                     children: [
-                                      const Icon(Icons.cameraswitch_rounded,
-                                          size: 18),
-                                      const SizedBox(
-                                        width: 3,
-                                      ),
+                                      isFlashOn
+                                          ? const Icon(Icons.flashlight_on_sharp,
+                                              size: 18, color: Colors.yellow)
+                                          : const Icon(Icons.flashlight_off_sharp,
+                                              size: 18),
                                       Text(
-                                        "Kamera",
+                                        "Flash",
                                         style: blueTextStyle.copyWith(
                                           fontSize: 12,
                                           fontWeight: semiBold,
                                           color: whiteColor,
                                         ),
-                                      )
+                                        textAlign: TextAlign.center,
+                                      ),
                                     ],
                                   );
-                                } else {
-                                  return const Text('loading');
-                                }
+                                },
+                              )),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.all(8),
+                          child: ElevatedButton(
+                              onPressed: () async {
+                                await controller?.flipCamera();
+                                setState(() {});
                               },
-                            )),
-                      )
-                    ],
-                  ),
-                ],
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      20), // Adjust the radius to make it more or less rounded
+                                ),
+                              ),
+                              child: FutureBuilder(
+                                future: controller?.getCameraInfo(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.data != null) {
+                                    // return Text(' ${describeEnum(snapshot.data!)} ');
+                                    return Row(
+                                      children: [
+                                        const Icon(Icons.cameraswitch_rounded,
+                                            size: 18),
+                                        const SizedBox(
+                                          width: 3,
+                                        ),
+                                        Text(
+                                          "Kamera",
+                                          style: blueTextStyle.copyWith(
+                                            fontSize: 12,
+                                            fontWeight: semiBold,
+                                            color: whiteColor,
+                                          ),
+                                        )
+                                      ],
+                                    );
+                                  } else {
+                                    return const Text('loading');
+                                  }
+                                },
+                              )),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           )

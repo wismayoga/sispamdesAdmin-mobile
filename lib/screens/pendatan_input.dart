@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:sispamdes/models/pelanggan_model.dart';
+import 'package:sispamdes/models/pendataan_model.dart';
 import 'package:sispamdes/providers/pelanggan_provider.dart';
 import 'package:sispamdes/providers/pendataan_provider.dart';
 import 'package:sispamdes/screens/pendataan_ocr.dart';
@@ -40,6 +41,8 @@ class _PendataanInputScreenState extends State<PendataanInputScreen> {
 
     final String? scannedData =
         ModalRoute.of(context)?.settings.arguments as String?;
+    print('iniscandata');
+    print(scannedData);
     if (scannedData != null) {
       final pelangganProvider =
           Provider.of<PelangganProvider>(context, listen: false);
@@ -67,20 +70,56 @@ class _PendataanInputScreenState extends State<PendataanInputScreen> {
 
   Future<void> _getImageFromGallery() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.camera);
-    
-
+    final pickedFile = await picker.pickImage(source: ImageSource.camera, preferredCameraDevice: CameraDevice.rear);
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
-        captureImage =  pickedFile;
+        captureImage = pickedFile;
       });
     }
+  }
+
+  bool _validateForm() {
+    final form = formkey.currentState;
+    if (form == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Isi form yang kosong!'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    }
+
+    if (!form.validate()) {
+      // Show snackbar or toast to inform the user about the validation errors.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Isi form yang kosong!'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    }
+
+    if (_image == null) {
+      // Show snackbar or toast to inform the user to capture an image.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gambar belum diambil!'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    }
+
+    return true;
   }
 
   @override
   Widget build(BuildContext context) {
     final pendataanProvider = Provider.of<PendataanProvider>(context);
+    final List<PendataanModel> pendataans = pendataanProvider.pendataans;
     final pelangganProvider = Provider.of<PelangganProvider>(context);
     final List<PelangganModel> pelanggans = pelangganProvider.pelanggans;
     final String? scannedData =
@@ -158,262 +197,358 @@ class _PendataanInputScreenState extends State<PendataanInputScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 width: double.infinity,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Form Pendataan",
-                      style: secondaryTextStyle.copyWith(
-                        fontSize: 12,
-                        color: secondaryColor,
-                        fontWeight: regular,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    DropdownSearch<dynamic>(
-                      validator: (value) => "Pilih Pelanggan",
-                      popupProps: const PopupProps.menu(
-                        menuProps: MenuProps(
-                          backgroundColor: whiteColor,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadiusDirectional.only(
-                                  bottomStart: Radius.circular(12),
-                                  bottomEnd: Radius.circular(12))),
+                child: Form(
+                  key: formkey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Form Pendataan",
+                        style: secondaryTextStyle.copyWith(
+                          fontSize: 12,
+                          color: secondaryColor,
+                          fontWeight: regular,
                         ),
-                        showSearchBox: true,
-                        searchFieldProps: TextFieldProps(
-                          padding: EdgeInsets.fromLTRB(15, 15, 15, 10),
-                          decoration: InputDecoration(
-                            suffixIcon: Icon(Icons.search),
-                            border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(12)),
-                            ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      DropdownSearch<dynamic>(
+                        validator: (selectedItem) {
+                          if (selectedItem == null || selectedItem.isEmpty) {
+                            return 'Pilih pelanggan terlebih dahulu';
+                          }
+                          return null;
+                        },
+                        popupProps: const PopupProps.menu(
+                          menuProps: MenuProps(
+                            backgroundColor: whiteColor,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadiusDirectional.only(
+                                    bottomStart: Radius.circular(12),
+                                    bottomEnd: Radius.circular(12))),
                           ),
-                        ),
-                        showSelectedItems: true,
-                      ),
-                      items: pelangganProvider.pelanggans
-                          .where((pelanggan) => pelanggan.role == "Pelanggan")
-                          .map((pelanggan) => pelanggan.nama)
-                          .toList(),
-                      clearButtonProps: const ClearButtonProps(
-                        icon: Icon(Icons.clear, size: 20),
-                        color: secondaryTextColor,
-                        isVisible: false,
-                      ),
-                      dropdownDecoratorProps: const DropDownDecoratorProps(
-                        dropdownSearchDecoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(12))),
-                          fillColor: whiteColor,
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(12)),
-                              borderSide: BorderSide(color: primaryColor)),
-                          filled: true,
-                          labelText: "Pelanggan",
-                          hintText: "Pilih pelanggan",
-                        ),
-                      ),
-                      onChanged: (selectedItem) {
-                        final pelangganId = pelanggans
-                            .firstWhere(
-                                (pelanggan) => pelanggan.nama == selectedItem)
-                            .id
-                            .toString();
-                        pelangganSelected = pelangganId;
-                        updateBulanLaluController(pelangganId);
-                      },
-                      compareFn: (item, selectedItem) => item == selectedItem,
-                      selectedItem: scannedData != null
-                          ? pelanggans
-                              .firstWhere((pelanggan) =>
-                                  pelanggan.id.toString() == scannedData)
-                              .nama
-                          : null,
-                    ),
-                    const SizedBox(height: 20),
-                    CustomFormField(
-                      title: 'Bulan Lalu',
-                      hint: 'Bulan lalu',
-                      isReadOnly: true,
-                      controller: bulanlaluController,
-                      keyboardType: TextInputType.text,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Field cannot be empty';
-                        }
-                        // Add other validation rules here if needed
-                        return null; // Return null if the input is valid
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.60,
-                          child: TextFormField(
-                            cursorColor: primaryTextColor,
-                            keyboardType: TextInputType.number,
-                            controller: bulaniniController,
-                            autovalidateMode:
-                                AutovalidateMode.onUserInteraction,
-                            validator: (value) {
-                              // NULL
-                              if (value!.isEmpty) {
-                                return "";
-                              }
-                              return null;
-                            },
+                          showSearchBox: true,
+                          searchFieldProps: TextFieldProps(
+                            padding: EdgeInsets.fromLTRB(15, 15, 15, 10),
                             decoration: InputDecoration(
-                              labelText: 'Bulan Ini',
-                              labelStyle: secondaryTextStyle.copyWith(
-                                fontSize: 14,
-                                fontWeight: semiBold,
-                              ),
-                              suffixStyle: primaryTextStyle.copyWith(
-                                fontSize: 14,
-                                fontWeight: regular,
-                              ),
-                              errorStyle: const TextStyle(height: 0),
-                              contentPadding: const EdgeInsets.fromLTRB(
-                                  20.0, 0.0, 20.0, 0.0),
-                              hintText: 'Bulan ini',
-                              hintStyle: secondaryTextStyle.copyWith(
-                                fontSize: 14,
-                                fontWeight: regular,
-                              ),
-                              fillColor: whiteColor,
-                              filled: true,
+                              suffixIcon: Icon(Icons.search),
                               border: OutlineInputBorder(
-                                borderSide:
-                                    const BorderSide(color: primaryTextColor),
-                                borderRadius: BorderRadius.circular(
-                                  12,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: primaryColor,
-                                ),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(12)),
                               ),
                             ),
+                          ),
+                          showSelectedItems: true,
+                        ),
+                        items: pelangganProvider.pelanggans
+                            .where((pelanggan) => pelanggan.role == "Pelanggan")
+                            .map((pelanggan) => pelanggan.nama)
+                            .toList(),
+                        clearButtonProps: const ClearButtonProps(
+                          icon: Icon(Icons.clear, size: 20),
+                          color: secondaryTextColor,
+                          isVisible: false,
+                        ),
+                        dropdownDecoratorProps: const DropDownDecoratorProps(
+                          dropdownSearchDecoration: InputDecoration(
+                            border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(12))),
+                            fillColor: whiteColor,
+                            focusedBorder: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(12)),
+                                borderSide: BorderSide(color: primaryColor)),
+                            filled: true,
+                            labelText: "Pelanggan",
+                            hintText: "Pilih pelanggan",
                           ),
                         ),
-                        const Spacer(),
-                        GestureDetector(
-                          onTap: () async {
-                            final returnedData = await Navigator.of(context)
-                                .pushNamed(OCRScreen.routeName);
-                            setState(() {
-                              bulaniniController.text = returnedData.toString();
-                            });
-                          },
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.15,
-                            height: 50,
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                                color: whiteColor,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: primaryTextColor,
-                                )),
-                            child: SvgPicture.asset(
-                              'assets/input_ocr.svg',
-                              color: primaryColor,
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    //foto
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        TextButton(
-                          onPressed: _getImageFromGallery,
-                          style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(
-                                Colors.grey.withOpacity(0.1)),
-                            shape: MaterialStateProperty.all<
-                                RoundedRectangleBorder>(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                    6), // Adjust the radius as needed
-                                side: const BorderSide(
-                                    color: Colors.grey,
-                                    width: 1.5), // Border color and width
-                              ),
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(1.0),
-                            child: Column(
-                              children: [
-                                SvgPicture.asset(
-                                  'assets/input_camera.svg',
-                                  width: 20,
+                        compareFn: (item, selectedItem) => item == selectedItem,
+                        selectedItem: scannedData == null
+                            ? null
+                            : pelanggans
+                                .firstWhere((pelanggan) =>
+                                    pelanggan.id.toString() == scannedData)
+                                .nama,
+                        onChanged: (selectedItem) {
+                          if (selectedItem != null) {
+                            final pelangganId = pelanggans
+                                .firstWhere((pelanggan) =>
+                                    pelanggan.nama == selectedItem)
+                                .id
+                                .toString();
+                            pelangganSelected = pelangganId;
+                            print('iniselectedPelanggan');
+                            print(pelangganSelected);
+                            updateBulanLaluController(pelangganId);
+                          } else {
+                            pelangganSelected = null;
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 25),
+                      CustomFormField(
+                        title: 'Bulan Lalu',
+                        hint: 'Bulan lalu',
+                        isReadOnly: true,
+                        controller: bulanlaluController,
+                        keyboardType: TextInputType.text,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Field cannot be empty';
+                          }
+                          // Add other validation rules here if needed
+                          return null; // Return null if the input is valid
+                        },
+                      ),
+                      const SizedBox(height: 25),
+                      Row(
+                        children: [
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.60,
+                            child: TextFormField(
+                              cursorColor: primaryTextColor,
+                              keyboardType: TextInputType.number,
+                              controller: bulaniniController,
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
+                              validator: (value) {
+                                // NULL
+                                if (value!.isEmpty) {
+                                  return "";
+                                }
+                                return null;
+                              },
+                              decoration: InputDecoration(
+                                labelText: 'Bulan Ini',
+                                labelStyle: secondaryTextStyle.copyWith(
+                                  fontSize: 14,
+                                  fontWeight: semiBold,
                                 ),
-                                Text(
-                                  'Ambil Gambar',
-                                  style: secondaryTextStyle.copyWith(
-                                    fontSize: 12,
-                                    fontWeight: semiBold,
+                                suffixStyle: primaryTextStyle.copyWith(
+                                  fontSize: 14,
+                                  fontWeight: regular,
+                                ),
+                                errorStyle: const TextStyle(height: 0),
+                                contentPadding: const EdgeInsets.fromLTRB(
+                                    20.0, 0.0, 20.0, 0.0),
+                                hintText: 'Bulan ini',
+                                hintStyle: secondaryTextStyle.copyWith(
+                                  fontSize: 14,
+                                  fontWeight: regular,
+                                ),
+                                fillColor: whiteColor,
+                                filled: true,
+                                border: OutlineInputBorder(
+                                  borderSide:
+                                      const BorderSide(color: primaryTextColor),
+                                  borderRadius: BorderRadius.circular(
+                                    12,
                                   ),
                                 ),
-                              ],
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                    color: primaryColor,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        _image != null
-                            ? Image.file(
-                                _image!,
-                                height: 50,
-                                width: 50,
-                                fit: BoxFit.cover,
-                              )
-                            : Container(
-                                height: 50,
-                                width: 50,
-                                color: Colors.grey[300],
-                                child: Icon(Icons.image,
-                                    size: 50, color: Colors.grey[600]),
-                              ),
-                      ],
-                    ),
-
-                    //button simpan
-                    const SizedBox(
-                      height: 40,
-                    ),
-                    isLoading
-                        ? const LoadingButton(
-                            color: primaryColor,
-                          )
-                        : CustomButton(
-                            text: 'Submit',
-                            color: primaryColor,
-                            press: () async {
-                              Navigator.pop(context);
-                              await PendataanProvider()
-                                  .postPendataan(pelangganSelected, captureImage, int.parse(bulaniniController.text) );
-                              pendataanProvider.getPendataans();
-                              
+                          const Spacer(),
+                          GestureDetector(
+                            onTap: () async {
+                              final returnedData = await Navigator.of(context)
+                                  .pushNamed(OCRScreen.routeName);
+                              setState(() {
+                                bulaniniController.text =
+                                    returnedData.toString();
+                              });
                             },
+                            child: Container(
+                              width: MediaQuery.of(context).size.width * 0.15,
+                              height: 50,
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                  color: whiteColor,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: primaryTextColor.withOpacity(0.65),
+                                  )),
+                              child: SvgPicture.asset(
+                                'assets/input_ocr.svg',
+                                color: secondaryTextColor.withOpacity(1),
+                              ),
+                            ),
                           )
-                  ],
+                        ],
+                      ),
+                      const SizedBox(height: 25),
+                      //foto
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          TextButton(
+                            onPressed: _getImageFromGallery,
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                  Colors.white.withOpacity(0.6)),
+                              shape: MaterialStateProperty.all<
+                                  RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      6), // Adjust the radius as needed
+                                  side: const BorderSide(
+                                      color: Colors.grey,
+                                      width: 1.5), // Border color and width
+                                ),
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(1.0),
+                              child: Column(
+                                children: [
+                                  SvgPicture.asset(
+                                    'assets/input_camera.svg',
+                                    width: 20,
+                                  ),
+                                  Text(
+                                    'Ambil Gambar',
+                                    style: secondaryTextStyle.copyWith(
+                                      fontSize: 12,
+                                      fontWeight: semiBold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          _image != null
+                              ? Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.done_rounded,
+                                      color: Colors.green,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 3),
+                                    Text(
+                                      "Diambil",
+                                      style: blueTextStyle.copyWith(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                        fontWeight: regular,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.image_not_supported_rounded,
+                                      color: Colors.grey,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 3),
+                                    Text(
+                                      "Belum diambil",
+                                      style: blueTextStyle.copyWith(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                        fontWeight: regular,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ],
+                      ),
+
+                      //button simpan
+                      const SizedBox(
+                        height: 60,
+                      ),
+                      isLoading
+                          ? const LoadingButton(
+                              color: primaryColor,
+                            )
+                          : CustomButton(
+                              text: 'Submit',
+                              color: primaryColor,
+                              press: () async {
+                                if (_validateForm()) {
+                                  // The form is valid and the image is captured. Continue with submission.
+                                  setState(() {
+                                    isLoading =
+                                        true; // Set isLoading to true before form submission.
+                                  });
+                                  final pendataanProvider =
+                                      Provider.of<PendataanProvider>(context,
+                                          listen: false);
+
+                                  // Check if a Pendataan record exists for the selected Pelanggan and current month
+                                  final pendataanExist = pendataanProvider
+                                      .pendataans
+                                      .any((pendataan) {
+                                    final pendataanDate = DateTime.parse(
+                                        pendataan.created_at.toString());
+                                    final currentDate = DateTime.now().toUtc();
+                                    return pendataan.id_pelanggan !=
+                                            pelangganSelected &&
+                                        pendataanDate.month !=
+                                            currentDate.month &&
+                                        pendataanDate.year != currentDate.year;
+                                  });
+
+                                  if (pendataanExist) {
+                                    // Show the warning Snackbar
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            'Pendataan bulan ini sudah dilakukan!'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  } else if (int.parse(
+                                          bulaniniController.text) <
+                                      int.parse(bulanlaluController.text)) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            'Pendataan bulan ini lebih kecil dari bulan lalu!!'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  } else {
+                                    // Continue with the normal flow
+                                    Navigator.pop(context);
+                                    print(
+                                        'ini pelanggan selecterd $pelangganSelected $scannedData');
+
+                                    await PendataanProvider()
+                                        .postPendataanLocal(
+                                      scannedData ?? pelangganSelected,
+                                      captureImage,
+                                      int.parse(bulaniniController.text) ,
+                                      int.parse(bulaniniController.text) -
+                                          int.parse(bulanlaluController.text),
+                                    );
+                                    pendataanProvider.getPendataans();
+                                  }
+                                  setState(() {
+                                    isLoading = false;
+                                  });
+                                }
+                              },
+                            ),
+                    ],
+                  ),
                 ),
               ),
             ))

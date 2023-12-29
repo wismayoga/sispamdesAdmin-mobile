@@ -9,6 +9,8 @@ import 'package:sispamdes/screens/syaratdanketentuan.dart';
 import 'package:sispamdes/theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sispamdes/utils/shared_preferences.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class ProfilScreen extends StatefulWidget {
   const ProfilScreen({super.key});
@@ -35,43 +37,113 @@ class _ProfilScreenState extends State<ProfilScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final user = authProvider.user;
+    // final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    // final user = authProvider.user;
 
-    // LOGOUT HANDLE
-    handleLogout() async {
-      setState(() {
-        isLoading = true;
-      });
+    Future<bool> checkInternetConnection() async {
+      var connectivityResult = await Connectivity().checkConnectivity();
+      return connectivityResult != ConnectivityResult.none;
+    }
 
+    void showNoInternetConnectionPopup() {
       showDialog(
         context: context,
-        barrierDismissible: false,
         builder: (BuildContext context) {
-          return const Center(
-            child: CircularProgressIndicator(
-              color: primaryColor,
+          return Dialog(
+            shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30.0)),
+            child: SizedBox(
+              height: 330,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset('assets/nointernet.svg', height: 120,),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    "Whoops!",
+                    style: primaryTextStyle.copyWith(
+                      fontSize: 16,
+                      fontWeight: semiBold,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  Text(
+                    "Tidak ada koneksi internet. \nPeriksa pengaturan koneksi anda",
+                    style: secondaryTextStyle.copyWith(
+                      fontSize: 12,
+                      fontWeight: regular,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    style: TextButton.styleFrom(
+                  foregroundColor: Colors.red,
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  backgroundColor: primaryDarkColor),
+                    child: Text(
+                      "OK",
+                      style: secondaryTextStyle.copyWith(
+                        fontSize: 12,
+                        color: whiteColor,
+                        fontWeight: regular,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                ],
+              ),
             ),
           );
         },
       );
-
-      if (await authProvider.logout(
-        token: user.token!,
-      )) {
-        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Colors.red,
-            content: Text(
-              'Gagal Logout!',
-              textAlign: TextAlign.center,
-            ),
-          ),
-        );
-      }
     }
+
+    // LOGOUT HANDLE
+    // handleLogout() async {
+    //   setState(() {
+    //     isLoading = true;
+    //   });
+
+    //   showDialog(
+    //     context: context,
+    //     barrierDismissible: false,
+    //     builder: (BuildContext context) {
+    //       return const Center(
+    //         child: CircularProgressIndicator(
+    //           color: primaryColor,
+    //         ),
+    //       );
+    //     },
+    //   );
+
+    //   if (await authProvider.logout(
+    //     token: user.token!,
+    //   )) {
+    //     Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+    //   } else {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(
+    //         backgroundColor: Colors.red,
+    //         content: Text(
+    //           'Gagal Logout!',
+    //           textAlign: TextAlign.center,
+    //         ),
+    //       ),
+    //     );
+    //   }
+    // }
 
     return Scaffold(
       body: Container(
@@ -146,57 +218,24 @@ class _ProfilScreenState extends State<ProfilScreen> {
                               String fotoProfil =
                                   (snapshot.data?.foto_profil ?? '');
 
-                              // Check if fotoProfil is empty, if true, use the placeholder image URL
-                              if (fotoProfil.isEmpty) {
-                                fotoProfil =
-                                    'https://source.unsplash.com/featured/100x100';
-                              }
                               return Column(
                                 children: [
                                   //container foto profil
                                   Column(
                                     children: [
-                                      Container(
+                                      SizedBox(
                                         width: 100,
                                         height: 100,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color:
-                                                  Colors.grey.withOpacity(0.5),
-                                              offset: const Offset(0, 3),
-                                            ),
-                                          ],
-                                        ),
                                         child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(100),
-                                          child: Image.network(
-                                            fotoProfil,
+                                          child: CachedNetworkImage(
+                                            imageUrl: fotoProfil,
                                             fit: BoxFit.cover,
-                                            loadingBuilder: (context, child,
-                                                loadingProgress) {
-                                              if (loadingProgress == null) {
-                                                return child;
-                                              }
-                                              return Center(
-                                                child:
-                                                    CircularProgressIndicator(
-                                                  value: loadingProgress
-                                                              .expectedTotalBytes !=
-                                                          null
-                                                      ? loadingProgress
-                                                              .cumulativeBytesLoaded /
-                                                          (loadingProgress
-                                                                  .expectedTotalBytes ??
-                                                              1)
-                                                      : null,
-                                                ),
-                                              );
-                                            },
-                                            errorBuilder:
-                                                (context, error, stackTrace) =>
+                                            placeholder: (context, url) =>
+                                                const CircularProgressIndicator(),
+                                            errorWidget:
+                                                (context, url, error) =>
                                                     const Icon(Icons.error),
                                           ),
                                         ),
@@ -240,9 +279,15 @@ class _ProfilScreenState extends State<ProfilScreen> {
                       Column(
                         children: [
                           GestureDetector(
-                            onTap: () {
-                              Navigator.of(context)
-                                  .pushNamed(ProfilEditScreen.routeName);
+                            onTap: () async {
+                              bool isConnected =
+                                  await checkInternetConnection();
+                              if (isConnected) {
+                                Navigator.of(context)
+                                    .pushNamed(ProfilEditScreen.routeName);
+                              } else {
+                                showNoInternetConnectionPopup();
+                              }
                             },
                             child: Container(
                               padding: const EdgeInsets.only(bottom: 10),
@@ -437,7 +482,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
                                                       children: [
                                                         GestureDetector(
                                                           onTap: () {
-                                                            handleLogout();
+                                                            // handleLogout();
                                                           },
                                                           child: Container(
                                                             width: 72,

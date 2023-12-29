@@ -9,8 +9,9 @@ import 'package:dio/dio.dart';
 
 class AuthService {
   // String baseUrl = 'http://127.0.0.1/sispamdes/public/api';
-  // String baseUrl = 'http://10.0.2.2/sispamdes/public/api';
-  String baseUrl = 'http://192.168.33.174/sispamdes/public/api';
+  // String baseUrl = 'http://10.0.2.2/sispamdes2/public/api';
+  String baseUrl = 'http://192.168.1.130/sispamdes2/public/api';
+  // String baseUrl = 'http://sispamdes.my.id/api';
 
   // LOGIN
   Future<UserModel> login({
@@ -63,8 +64,7 @@ class AuthService {
       var data = jsonDecode(response.body)['data'];
       UserModel user = UserModel.fromJson(data);
       user.token = token;
-      user.nama = data['nama'];
-
+  
       return user;
     } else {
       UserPreferences().removeToken();
@@ -101,7 +101,7 @@ class AuthService {
   }
 
   // POST EDIT USER DATA
-  Future<bool> editProfil({
+  Future<dynamic> editProfil({
     required String nama,
     required String email,
     // ignore: non_constant_identifier_names
@@ -136,30 +136,12 @@ class AuthService {
     print('status code: ${response.statusCode} ');
 
     if (response.statusCode == 200) {
-      // Successful API call, now update the SharedPreferences data
-      UserModel? currentUser = await UserPreferences().getUser();
-      if (currentUser != null) {
-        // Create a new UserModel instance with the updated values
-        UserModel updatedUser = UserModel(
-          id: currentUser.id,
-          role: currentUser.role,
-          token: currentUser.token,
-          status: currentUser.status,
-          foto_profil: currentUser.foto_profil,
-          // Update the fields with the edited values
-          nama: nama,
-          email: email,
-          nomor_hp: nomor_hp,
-          alamat: alamat,
-        );
+      var data = jsonDecode(response.body)['data'];
+      UserModel user = UserModel.fromJson(data);
 
-        // Call the method to update the user data in SharedPreferences
-        await UserPreferences().updateUser(updatedUser);
-      }
-      return true;
+      return user;
     } else {
-      return false;
-      // throw Exception('Gagal Menyimpan Data');
+      throw Exception('Gagal Mengedit Profil');
     }
   }
 
@@ -266,6 +248,7 @@ class AuthService {
 
       return true;
     } else {
+      UserPreferences().removeToken();
       throw Exception('Error Logout');
     }
   }

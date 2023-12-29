@@ -89,10 +89,14 @@ class _OCRScreenState extends State<OCRScreen> {
                       ..style = PaintingStyle.stroke
                       ..strokeWidth = 4.0
                       ..color = const Color.fromARGB(153, 102, 160, 241),
-                    boxLeftOff: 4,
-                    boxBottomOff: 2.7,
-                    boxRightOff: 4,
-                    boxTopOff: 2.7,
+                    // boxLeftOff: 4,
+                    // boxBottomOff: 2.7,
+                    // boxRightOff: 4,
+                    // boxTopOff: 2.7,
+                    boxLeftOff: 5.5,
+                    boxBottomOff: 3.5,
+                    boxRightOff: 5.5,
+                    boxTopOff: 3.5,
                     boxHeight: MediaQuery.of(context).size.height / 5,
                     getScannedText: (value) {
                       setText(value);
@@ -165,7 +169,7 @@ class Result extends StatelessWidget {
                     const SnackBar(
                       backgroundColor: Colors.red,
                       content: Text(
-                        'Silahkan pindai nilai redaman terlebih dahulu!',
+                        'Silahkan pindai nilai meteran terlebih dahulu!',
                         textAlign: TextAlign.center,
                       ),
                     ),

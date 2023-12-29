@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import 'package:sispamdes/models/pelanggan_model.dart';
 import 'package:sispamdes/models/pendataan_model.dart';
-import 'package:sispamdes/screens/riwayatdetail.dart';
-import 'package:sispamdes/services/resource_service.dart';
+import 'package:sispamdes/providers/pelanggan_provider.dart';
+import 'package:sispamdes/providers/pendataan_provider.dart';
+import 'package:sispamdes/screens/pelanggan_edit.dart';
 import 'package:sispamdes/theme.dart';
+import 'package:intl/intl.dart';
 
 class PelangganDetail extends StatefulWidget {
   const PelangganDetail({super.key});
@@ -15,28 +18,21 @@ class PelangganDetail extends StatefulWidget {
 }
 
 class _PelangganDetailState extends State<PelangganDetail> {
-  final List<Map> data =
-      List.generate(100, (index) => {'id': index, 'name': 'Item $index'});
   bool statusPendataan = false;
-  List<PendataanModel> pendataans = [];
 
   @override
   void initState() {
-    getPendataans();
     super.initState();
-  }
-
-  getPendataans() async {
-    var res = await ResourceService().getPendataans();
-    setState(() {
-      pendataans = res.toList();
-    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final pendataanProvider = Provider.of<PendataanProvider>(context);
+    final List<PendataanModel> pendataans =
+        pendataanProvider.pendataans + pendataanProvider.pendataansOnline;
     final pelanggan =
         ModalRoute.of(context)!.settings.arguments as PelangganModel;
+
     checkPendataanStatus() {
       final now = DateTime.now();
       final thisMonth = DateTime(now.year, now.month);
@@ -433,7 +429,12 @@ class _PelangganDetailState extends State<PelangganDetail> {
                                         width: 60,
                                         height: 30,
                                         child: TextButton(
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            Navigator.of(context).pushNamed(
+                                              PelangganEditScreen.routeName,
+                                              arguments: pelanggan,
+                                            );
+                                          },
                                           style: TextButton.styleFrom(
                                             foregroundColor: whiteColor,
                                             backgroundColor: secondaryTextColor,
@@ -483,6 +484,14 @@ class _PelangganDetailState extends State<PelangganDetail> {
                                   itemBuilder: (BuildContext ctx, index) {
                                     PendataanModel pendataan =
                                         pendataans[index];
+
+                                    String tanggal =
+                                        pendataan.created_at.toString();
+                                    DateTime dateTime = DateTime.parse(tanggal);
+                                    // dateTime = dateTime.add(Duration(hours: 8));
+                                    String formattedDate =
+                                        DateFormat('EEEE, dd-MM-yyyy HH:mm', 'id_ID').format(dateTime);
+
                                     if (pendataan.id_pelanggan !=
                                         pelanggan.id.toString()) {
                                       return Container();
@@ -499,11 +508,11 @@ class _PelangganDetailState extends State<PelangganDetail> {
                                         color: whiteColor,
                                         child: ListTile(
                                           onTap: () {
-                                            Navigator.of(context).pushNamed(
-                                                RiwayatDetail.routeName);
+                                            // Navigator.of(context).pushNamed(
+                                            //     RiwayatDetail.routeName);
                                           },
                                           title: Text(
-                                            pendataan.created_at.toString(),
+                                            '$formattedDate',
                                             style: secondaryTextStyle.copyWith(
                                               fontSize: 14,
                                               color: primaryTextColor,
@@ -511,39 +520,12 @@ class _PelangganDetailState extends State<PelangganDetail> {
                                             ),
                                           ),
                                           subtitle: Text(
-                                            "15-06-2023 | Total : 34 | Harga : Rp. 35.000.",
+                                            "Total : 34 | Harga : Rp. 35.000.",
                                             overflow: TextOverflow.ellipsis,
                                             style: secondaryTextStyle.copyWith(
                                               fontSize: 10,
                                               color: secondaryTextColor,
                                               fontWeight: regular,
-                                            ),
-                                          ),
-                                          trailing: SizedBox(
-                                            width: 30,
-                                            height: 30,
-                                            child: Ink(
-                                              decoration: ShapeDecoration(
-                                                color: primaryColor,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(4),
-                                                ),
-                                              ),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(0),
-                                                child: Center(
-                                                  child: IconButton(
-                                                      iconSize: 15,
-                                                      icon: const Icon(
-                                                          Icons.sync_outlined),
-                                                      color: whiteColor,
-                                                      onPressed: () {
-                                                        //logic to open POPUP window
-                                                      }),
-                                                ),
-                                              ),
                                             ),
                                           ),
                                         ));

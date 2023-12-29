@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:sispamdes/models/pelanggan_model.dart';
 import 'package:sispamdes/models/pendataan_model.dart';
@@ -45,7 +46,8 @@ class _PelangganScreenState extends State<PelangganScreen> {
     final pelangganProvider = Provider.of<PelangganProvider>(context);
     final List<PelangganModel> pelanggans = pelangganProvider.pelanggans;
     final pendataanProvider = Provider.of<PendataanProvider>(context);
-    final List<PendataanModel> pendataans = pendataanProvider.pendataans;
+    final List<PendataanModel> pendataans =
+        pendataanProvider.pendataans + pendataanProvider.pendataansOnline;
 
     void handleToggle(int newIndex) {
       setState(() {
@@ -327,52 +329,101 @@ class _PelangganScreenState extends State<PelangganScreen> {
                               ),
                               // list pelanggan
                               SizedBox(
-                                height: 350,
-                                child: ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: filteredPelanggans.length,
-                                  itemBuilder: (BuildContext ctx, index) {
-                                    final pelanggan = filteredPelanggans[index];
-                                    return Card(
-                                        key: ValueKey(pelanggan.id),
-                                        margin: const EdgeInsets.symmetric(
-                                            horizontal: 0, vertical: 3),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(3)),
+                                height: 400,
+                                child: filteredPelanggans.isEmpty
+                                    ? SizedBox(
+                                        height: 330,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            const SizedBox(
+                                              height: 30,
+                                            ),
+                                            SvgPicture.asset(
+                                              'assets/nopelanggan.svg',
+                                              height: 120,
+                                            ),
+                                            const SizedBox(
+                                              height: 20,
+                                            ),
+                                            Text(
+                                              "Tidak ada data!",
+                                              style: primaryTextStyle.copyWith(
+                                                fontSize: 16,
+                                                fontWeight: semiBold,
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              height: 5,
+                                            ),
+                                            Text(
+                                              "Tidak ada data pelanggan atau unduh data dari server",
+                                              style:
+                                                  secondaryTextStyle.copyWith(
+                                                fontSize: 12,
+                                                fontWeight: regular,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    : ListView.builder(
+                                        shrinkWrap: true,
+                                        itemCount: filteredPelanggans.length,
+                                        itemBuilder: (BuildContext ctx, index) {
+                                          final pelanggan =
+                                              filteredPelanggans[index];
+                                          return Card(
+                                              key: ValueKey(pelanggan.id),
+                                              margin:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 0,
+                                                      vertical: 3),
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(3)),
 
-                                        // The color depends on this is selected or not
-                                        color: whiteColor,
-                                        child: ListTile(
-                                          leading: const CircleAvatar(
-                                            backgroundImage: AssetImage(
-                                                'assets/profile.jpg'),
-                                          ),
-                                          onTap: () {
-                                            Navigator.of(context).pushNamed(
-                                                PelangganDetail.routeName,
-                                                arguments: pelanggan);
-                                          },
-                                          title: Text(
-                                            pelanggan.nama.toString(),
-                                            style: secondaryTextStyle.copyWith(
-                                              fontSize: 14,
-                                              color: primaryTextColor,
-                                              fontWeight: medium,
-                                            ),
-                                          ),
-                                          subtitle: Text(
-                                            " ${pelanggan.id}  | ${pelanggan.nomor_hp} | ${pelanggan.alamat}",
-                                            overflow: TextOverflow.ellipsis,
-                                            style: secondaryTextStyle.copyWith(
-                                              fontSize: 10,
-                                              color: secondaryTextColor,
-                                              fontWeight: regular,
-                                            ),
-                                          ),
-                                        ));
-                                  },
-                                ),
+                                              // The color depends on this is selected or not
+                                              color: whiteColor,
+                                              child: ListTile(
+                                                leading: const CircleAvatar(
+                                                  backgroundImage: AssetImage(
+                                                      'assets/profile.png'),
+                                                ),
+                                                onTap: () {
+                                                  Navigator.of(context)
+                                                      .pushNamed(
+                                                          PelangganDetail
+                                                              .routeName,
+                                                          arguments: pelanggan);
+                                                },
+                                                title: Text(
+                                                  pelanggan.nama.toString(),
+                                                  style: secondaryTextStyle
+                                                      .copyWith(
+                                                    fontSize: 14,
+                                                    color: primaryTextColor,
+                                                    fontWeight: medium,
+                                                  ),
+                                                ),
+                                                subtitle: Text(
+                                                  " ${pelanggan.id}  | ${pelanggan.nomor_hp} | ${pelanggan.alamat}",
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: secondaryTextStyle
+                                                      .copyWith(
+                                                    fontSize: 10,
+                                                    color: secondaryTextColor,
+                                                    fontWeight: regular,
+                                                  ),
+                                                ),
+                                              ));
+                                        },
+                                      ),
                               ),
                             ],
                           ),

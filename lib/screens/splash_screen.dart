@@ -29,6 +29,8 @@ class _SplashScreenState extends State<SplashScreen> {
     // Get user Data
     if (islogin == true) {
       //ignore: avoid_print
+      print(token);
+      //ignore: avoid_print
       print('login true');
       await Provider.of<AuthProvider>(context, listen: false).getUser(token);
     }

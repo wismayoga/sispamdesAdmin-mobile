@@ -18,7 +18,7 @@ class PendataanModel {
   String? created_at;
   // ignore: non_constant_identifier_names
   String? updated_at;
-  String? token;
+  // String? token;
 
   PendataanModel({
     required this.id,
@@ -40,11 +40,25 @@ class PendataanModel {
     required this.created_at,
     // ignore: non_constant_identifier_names
     required this.updated_at,
-    required this.token,
+    // required this.token,
   });
 
+  // PendataanModel.fromJson(Map<String, dynamic> json) {
+  //   id = json['id'];
+  //   id_petugas = json['id_petugas'];
+  //   id_pelanggan = json['id_pelanggan'];
+  //   nilai_meteran = json['nilai_meteran'];
+  //   foto_meteran = json['foto_meteran'];
+  //   total_penggunaan = json['total_penggunaan'];
+  //   total_harga = json['total_harga'];
+  //   status_pembayaran = json['status_pembayaran'];
+  //   created_at = json['created_at'];
+  //   updated_at = json['updated_at'];
+  //   // token = json['token'];
+  // }
+
   PendataanModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
+  id = json['id'];
   id_petugas = json['id_petugas'];
   id_pelanggan = json['id_pelanggan'];
   nilai_meteran = json['nilai_meteran'];
@@ -54,8 +68,8 @@ class PendataanModel {
   status_pembayaran = json['status_pembayaran'];
   created_at = json['created_at'];
   updated_at = json['updated_at'];
-  token = json['token'];
-  }
+  // token = json['token'];
+}
 
   Map<String, dynamic> toJson() {
     return {
@@ -69,7 +83,7 @@ class PendataanModel {
       'status_pembayaran': status_pembayaran,
       'created_at': created_at,
       'updated_at': updated_at,
-      'token': token,
+      // 'token': token,
     };
   }
 }

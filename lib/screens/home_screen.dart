@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import 'package:sispamdes/providers/pelanggan_provider.dart';
 import 'package:sispamdes/screens/pendatan_input.dart';
 import 'package:sispamdes/screens/profil.dart';
 import 'package:sispamdes/screens/qr_screen.dart';
@@ -29,6 +31,79 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final pelangganProvider =
+        Provider.of<PelangganProvider>(context, listen: false);
+    final pelanggans = pelangganProvider.pelanggans;
+
+    void noPelanggan() {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30.0)),
+            child: SizedBox(
+              height: 330,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(
+                    'assets/nopelanggan.svg',
+                    height: 120,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    "Whoops!",
+                    style: primaryTextStyle.copyWith(
+                      fontSize: 16,
+                      fontWeight: semiBold,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  Text(
+                    "Tidak ditemukan pelanggan. \nUnduh pelanggan terlebih dahulu",
+                    style: secondaryTextStyle.copyWith(
+                      fontSize: 12,
+                      fontWeight: regular,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    style: TextButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30)),
+                        backgroundColor: primaryDarkColor),
+                    child: Text(
+                      "OK",
+                      style: secondaryTextStyle.copyWith(
+                        fontSize: 12,
+                        color: whiteColor,
+                        fontWeight: regular,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+
     return Scaffold(
       body: screen[_selectedIndex],
       bottomNavigationBar: Container(
@@ -114,7 +189,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                           //button scan qr
                                           GestureDetector(
                                             onTap: () {
-                                              Navigator.of(context).pushReplacementNamed(QrScreen.routeName);
+                                              if (pelanggans.isNotEmpty) {
+                                                Navigator.of(context)
+                                                    .pushReplacementNamed(
+                                                        QrScreen.routeName);
+                                              } else {
+                                                Navigator.pop(context);
+                                                noPelanggan();
+                                              }
                                             },
                                             child: Column(
                                               children: [
@@ -170,7 +252,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                           //button search
                                           GestureDetector(
                                             onTap: () {
-                                              Navigator.of(context).pushReplacementNamed(PendataanInputScreen.routeName);
+                                              if (pelanggans.isNotEmpty) {
+                                                Navigator.of(context)
+                                                    .pushReplacementNamed(
+                                                        PendataanInputScreen
+                                                            .routeName);
+                                              } else {
+                                                Navigator.pop(context);
+                                                noPelanggan();
+                                              }
                                             },
                                             child: Column(
                                               children: [

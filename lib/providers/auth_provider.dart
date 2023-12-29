@@ -20,9 +20,48 @@ class AuthProvider with ChangeNotifier {
     try {
       UserModel user = await AuthService().getUser(token: token);
       _user = user;
+      notifyListeners();
     } catch (e) {
       //ignore: avoid_print
       print(e);
+    }
+  }
+
+  //POST DATA PROFILE
+  Future<dynamic> editProfil(
+      String nama, 
+      String email, 
+      // ignore: non_constant_identifier_names
+      String nomor_hp, 
+      String alamat
+    ) async {
+    try {
+      UserModel pelanggans = await AuthService().editProfil(
+          nama: nama, email: email, nomor_hp: nomor_hp, alamat: alamat);
+      UserModel? currentUser = await UserPreferences().getUser();
+      if (currentUser != null) {
+        // Create a new UserModel instance with the updated values
+        UserModel updatedUser = UserModel(
+          id: currentUser.id,
+          role: currentUser.role,
+          token: currentUser.token,
+          status: currentUser.status,
+          foto_profil: currentUser.foto_profil,
+          // Update the fields with the edited values
+          nama: pelanggans.nama,
+          email: pelanggans.email,
+          nomor_hp: pelanggans.nomor_hp,
+          alamat: pelanggans.alamat,
+        );
+        await UserPreferences().updateUser(updatedUser);
+        _user = updatedUser;
+        notifyListeners();
+        return true;
+      }
+    } catch (e) {
+      //ignore: avoid_print
+      print(e);
+      return false;
     }
   }
 
@@ -56,6 +95,7 @@ class AuthProvider with ChangeNotifier {
             // Call the method to update the user data in SharedPreferences
             await UserPreferences().updateUser(updatedUser);
           }
+          notifyListeners();
 
           // _user.foto_profil = imageURL;
 

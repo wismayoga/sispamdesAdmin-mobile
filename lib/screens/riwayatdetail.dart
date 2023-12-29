@@ -5,6 +5,7 @@ import 'package:sispamdes/models/pelanggan_model.dart';
 import 'package:sispamdes/models/pendataan_model.dart';
 import 'package:sispamdes/providers/pelanggan_provider.dart';
 import 'package:sispamdes/theme.dart';
+import 'package:intl/intl.dart';
 
 class RiwayatDetail extends StatelessWidget {
   const RiwayatDetail({super.key});
@@ -18,8 +19,21 @@ class RiwayatDetail extends StatelessWidget {
     final pelangganProvider = Provider.of<PelangganProvider>(context);
 
     // Find the specific user by user_id
-    PelangganModel user = pelangganProvider.pelanggans.firstWhere(
-        (user) => user.id.toString() == userId);
+    PelangganModel user = pelangganProvider.pelanggans
+        .firstWhere((user) => user.id.toString() == userId);
+
+    String originalDateStr = pendataan.created_at.toString();
+
+    // Step 1: Parse the original date string
+    DateTime parsedDate = DateTime.parse(originalDateStr);
+
+    // Step 2: Format the DateTime object into the desired format
+    // String formattedDate =
+    //     DateFormat('EEEE, dd-MM-yyyy HH:mm', 'id_ID').format(parsedDate);
+
+    // parsedDate = parsedDate.add(Duration(hours: 8));
+
+    String formattedDateWithAddedHours = DateFormat('EEEE, dd-MM-yyyy HH:mm', 'id_ID').format(parsedDate);
 
     return Scaffold(
       body: Container(
@@ -344,7 +358,7 @@ class RiwayatDetail extends StatelessWidget {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  "Bulan Lalu",
+                                                  "Tanggal Pendataan",
                                                   style: secondaryTextStyle
                                                       .copyWith(
                                                     fontSize: 12,
@@ -352,14 +366,9 @@ class RiwayatDetail extends StatelessWidget {
                                                     fontWeight: medium,
                                                   ),
                                                 ),
-                                                
                                                 Text(
-                                                
-                                                  pendataan.created_at !=
-                                                          null
-                                                      ? pendataan
-                                                          .created_at
-                                                          .toString()
+                                                  pendataan.created_at != null
+                                                      ? formattedDateWithAddedHours
                                                       : '-',
                                                   style: secondaryTextStyle
                                                       .copyWith(
@@ -373,7 +382,7 @@ class RiwayatDetail extends StatelessWidget {
                                           ],
                                         ),
                                       ),
-                                      
+
                                       const SizedBox(height: 5),
                                       Container(
                                         padding:
@@ -413,7 +422,8 @@ class RiwayatDetail extends StatelessWidget {
                                                   ),
                                                 ),
                                                 Text(
-                                                  pendataan.nilai_meteran.toString(),
+                                                  pendataan.nilai_meteran
+                                                      .toString(),
                                                   style: secondaryTextStyle
                                                       .copyWith(
                                                     fontSize: 12,
@@ -465,7 +475,8 @@ class RiwayatDetail extends StatelessWidget {
                                                   ),
                                                 ),
                                                 Text(
-                                                  pendataan.total_penggunaan.toString(),
+                                                  pendataan.total_penggunaan
+                                                      .toString(),
                                                   style: secondaryTextStyle
                                                       .copyWith(
                                                     fontSize: 12,
@@ -548,8 +559,9 @@ class RiwayatDetail extends StatelessWidget {
                                             SizedBox(
                                               width: 20,
                                               child: SvgPicture.asset(
-                                                'assets/biodata_foto.svg',
+                                                'assets/pendataan_info.svg',
                                                 height: 15,
+                                                color: primaryDarkColor, 
                                               ),
                                             ),
                                             const SizedBox(
@@ -560,7 +572,7 @@ class RiwayatDetail extends StatelessWidget {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  "Foto Pendataan",
+                                                  "Status Pembayaran",
                                                   style: secondaryTextStyle
                                                       .copyWith(
                                                     fontSize: 12,
@@ -569,7 +581,7 @@ class RiwayatDetail extends StatelessWidget {
                                                   ),
                                                 ),
                                                 Text(
-                                                  pendataan.foto_meteran.toString(),
+                                                  "${pendataan.status_pembayaran}",
                                                   style: secondaryTextStyle
                                                       .copyWith(
                                                     fontSize: 12,
@@ -582,52 +594,83 @@ class RiwayatDetail extends StatelessWidget {
                                           ],
                                         ),
                                       ),
+                                      // Container(
+                                      //   padding:
+                                      //       const EdgeInsets.only(bottom: 5),
+                                      //   decoration: BoxDecoration(
+                                      //     border: Border(
+                                      //       bottom: BorderSide(
+                                      //         color: backgroundColor
+                                      //             .withOpacity(1),
+                                      //         width: 1.0,
+                                      //       ),
+                                      //     ),
+                                      //   ),
+                                      //   child: Row(
+                                      //     children: [
+                                      //       SizedBox(
+                                      //         width: 20,
+                                      //         child: SvgPicture.asset(
+                                      //           'assets/biodata_foto.svg',
+                                      //           height: 15,
+                                      //         ),
+                                      //       ),
+                                      //       const SizedBox(
+                                      //         width: 15,
+                                      //       ),
+                                      //       Expanded(
+                                      //         child: Column(
+                                      //           crossAxisAlignment:
+                                      //               CrossAxisAlignment.start,
+                                      //           children: [
+                                      //             Text(
+                                      //               "Foto Pendataan",
+                                      //               style: secondaryTextStyle
+                                      //                   .copyWith(
+                                      //                 fontSize: 12,
+                                      //                 color: secondaryTextColor,
+                                      //                 fontWeight: medium,
+                                      //               ),
+                                      //             ),
+                                      //             Text(
+                                      //               pendataan.foto_meteran
+                                      //                   .toString(),
+                                      //               style: secondaryTextStyle
+                                      //                   .copyWith(
+                                      //                 fontSize: 12,
+                                      //                 color: secondaryTextColor,
+                                      //                 fontWeight: semiBold,
+                                      //               ),
+                                      //               overflow: TextOverflow.ellipsis,
+                                      //               maxLines: 1,
+                                      //             ),
+                                      //           ],
+                                      //         ),
+                                      //       ),
+                                      //     ],
+                                      //   ),
+                                      // ),
                                       //button edit dan sinkron
-                                      const SizedBox(
-                                        height: 15,
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          TextButton(
-                                            onPressed: () {},
-                                            style: TextButton.styleFrom(
-                                              foregroundColor: whiteColor,
-                                              backgroundColor:
-                                                  secondaryTextColor,
-                                              textStyle:
-                                                  secondaryTextStyle.copyWith(
-                                                fontSize: 12,
-                                                color: secondaryTextColor,
-                                                fontWeight: semiBold,
-                                              ),
-                                            ),
-                                            child: const Text(
-                                              'Edit',
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            width: 10,
-                                          ),
-                                          TextButton(
-                                            onPressed: () {},
-                                            style: TextButton.styleFrom(
-                                              foregroundColor: whiteColor,
-                                              backgroundColor: primaryColor,
-                                              textStyle:
-                                                  secondaryTextStyle.copyWith(
-                                                fontSize: 12,
-                                                color: secondaryTextColor,
-                                                fontWeight: semiBold,
-                                              ),
-                                            ),
-                                            child: const Text(
-                                              'Sinkron',
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                      // const SizedBox(
+                                      //   height: 15,
+                                      // ),
+                                      // TextButton(
+                                      //   onPressed: () {},
+                                      //   style: TextButton.styleFrom(
+                                      //     foregroundColor: whiteColor,
+                                      //     backgroundColor:
+                                      //         secondaryTextColor,
+                                      //     textStyle:
+                                      //         secondaryTextStyle.copyWith(
+                                      //       fontSize: 12,
+                                      //       color: secondaryTextColor,
+                                      //       fontWeight: semiBold,
+                                      //     ),
+                                      //   ),
+                                      //   child: const Text(
+                                      //     'Edit',
+                                      //   ),
+                                      // ),
                                     ],
                                   )),
                               const SizedBox(

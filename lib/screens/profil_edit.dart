@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sispamdes/models/user_model.dart';
 import 'package:sispamdes/providers/auth_provider.dart';
-import 'package:sispamdes/services/auth_service.dart';
 import 'package:sispamdes/theme.dart';
 import 'package:sispamdes/utils/shared_preferences.dart';
 import 'package:sispamdes/widget/loading_button.dart';
@@ -30,6 +29,11 @@ class _ProfilEditScreenState extends State<ProfilEditScreen> {
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     getUserData().then((userData) {
       if (userData != null) {
         setState(() {
@@ -55,12 +59,11 @@ class _ProfilEditScreenState extends State<ProfilEditScreen> {
       setState(() {
         isLoading = true;
       });
-
-      if (await AuthService().editProfil(
-        nama: namaController.text,
-        email: emailController.text,
-        nomor_hp: nomorhpController.text,
-        alamat: alamatController.text,
+      if (await AuthProvider().editProfil(
+        namaController.text,
+        emailController.text,
+        nomorhpController.text,
+        alamatController.text,
       )) {
         // Navigator.pushReplacement(
         //     context,

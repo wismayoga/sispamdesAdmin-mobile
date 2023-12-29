@@ -25,7 +25,6 @@ class _LauncherScreenState extends State<LauncherScreen> {
     // SET PROVIDER
     Provider.of<PelangganProvider>(context, listen: false).getPelanggans();
     Provider.of<PendataanProvider>(context, listen: false).getPendataans();
-    // Provider.of<WilayahProvider>(context, listen: false).getWilayah();
   }
 
   main() {

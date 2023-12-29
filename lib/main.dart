@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:sispamdes/launcher_screen.dart';
 import 'package:sispamdes/providers/auth_provider.dart';
@@ -7,6 +8,7 @@ import 'package:sispamdes/providers/pendataan_provider.dart';
 import 'package:sispamdes/screens/bantuan.dart';
 import 'package:sispamdes/screens/login_screen.dart';
 import 'package:sispamdes/screens/pelanggan.dart';
+import 'package:sispamdes/screens/pelanggan_edit.dart';
 import 'package:sispamdes/screens/pelanggandetail.dart';
 import 'package:sispamdes/screens/pendataan_ocr.dart';
 import 'package:sispamdes/screens/pendatan_input.dart';
@@ -19,9 +21,12 @@ import 'package:sispamdes/screens/riwayatdetail.dart';
 import 'package:sispamdes/screens/splash_screen.dart';
 import 'package:sispamdes/screens/syaratdanketentuan.dart';
 import './screens/home_screen.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 void main() {
-  runApp(const MyApp());
+  initializeDateFormatting('id_ID', '').then((_) {
+    runApp(const MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -36,7 +41,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => PendataanProvider()),
       ],
       child: MaterialApp(
-        // debugShowCheckedModeBanner: false,
+        debugShowCheckedModeBanner: false,
         // home: const LoginScreen(),
         // initialRoute: LoginScreen.routeName,
         
@@ -51,6 +56,7 @@ class MyApp extends StatelessWidget {
           RiwayatDetail.routeName:(context) => const RiwayatDetail(),
           PelangganScreen.routeName:(context) => const PelangganScreen(),
           PelangganDetail.routeName:(context) => const PelangganDetail(),
+          PelangganEditScreen.routeName:(context) => const PelangganEditScreen(),
           ProfilScreen.routeName:(context) => const ProfilScreen(),
           ProfilEditScreen.routeName:(context) => const ProfilEditScreen(),
           UbahSandiScreen.routeName:(context) => const UbahSandiScreen(),
@@ -61,6 +67,7 @@ class MyApp extends StatelessWidget {
           PendataanInputScreen.routeName:(context) => const PendataanInputScreen(nilaiMeteran: '', scanData: '',),
           OCRScreen.routeName:(context) => const OCRScreen(),
         }, 
+        builder: EasyLoading.init(),
       ),
     );
   }
